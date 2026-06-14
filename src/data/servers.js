@@ -3,7 +3,7 @@ export const categories = [
     "id": "fiber",
     "name": "Fiber@Home",
     "icon": "🏠",
-    "color": "#00E5FF",
+    "color": "#FFD700",
     "description": "Local ISP network servers and resources",
     "servers": [
       {
@@ -20,7 +20,8 @@ export const categories = [
         "url": "https://www.jhongkar.live/#next-section1",
         "description": "JHIT FTP server with media content",
         "icon": "📁",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaFolderOpen"
       },
       {
         "id": "f3",
@@ -28,7 +29,8 @@ export const categories = [
         "url": "http://iptvidn.com/",
         "description": "IPTV Indonesia streaming platform",
         "icon": "📺",
-        "tag": "IPTV"
+        "tag": "IPTV",
+        "iconKey": "FaDesktop"
       },
       {
         "id": "f4",
@@ -36,7 +38,8 @@ export const categories = [
         "url": "http://moviemazic.xyz/",
         "description": "Movie streaming and download portal",
         "icon": "🎬",
-        "tag": "Movies"
+        "tag": "Movies",
+        "iconKey": "FaPlay"
       },
       {
         "id": "f5",
@@ -44,7 +47,8 @@ export const categories = [
         "url": "http://timepassbd.live/",
         "description": "SkyView entertainment portal",
         "icon": "🎭",
-        "tag": "Entertainment"
+        "tag": "Entertainment",
+        "iconKey": "MdLiveTv"
       },
       {
         "id": "f6",
@@ -52,7 +56,8 @@ export const categories = [
         "url": "http://11plus.live/",
         "description": "Live TV and streaming service",
         "icon": "📡",
-        "tag": "Live TV"
+        "tag": "Live TV",
+        "iconKey": "FaSatelliteDish"
       },
       {
         "id": "f7",
@@ -60,7 +65,8 @@ export const categories = [
         "url": "http://103.109.213.254/",
         "description": "BTSL FTP server access",
         "icon": "🗄️",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaFolderOpen"
       },
       {
         "id": "f8",
@@ -68,7 +74,8 @@ export const categories = [
         "url": "http://172.17.17.10/",
         "description": "New FTP server on local network",
         "icon": "💾",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaFolderOpen"
       },
       {
         "id": "f9",
@@ -76,7 +83,8 @@ export const categories = [
         "url": "http://172.16.50.4/",
         "description": "Local network server 172.16.50.4",
         "icon": "🖥️",
-        "tag": "Local"
+        "tag": "Local",
+        "iconKey": "FaServer"
       },
       {
         "id": "f10",
@@ -84,7 +92,8 @@ export const categories = [
         "url": "http://circleftp.net/",
         "description": "Circle FTP media server",
         "icon": "🔄",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaFolderOpen"
       }
     ],
     "iconKey": "FaCity"
