@@ -1,0 +1,2 @@
+In one Terminal Run: npm run dev
+Another One Terminal: npm run api

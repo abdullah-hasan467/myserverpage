@@ -442,14 +442,6 @@ export const categories = [
       }
     ],
     "iconKey": "FaSatelliteDish"
-  },
-  {
-    "id": "zvbvfd7",
-    "servers": [],
-    "name": "Hasan",
-    "description": "sssssssss",
-    "iconKey": "FaSatelliteDish",
-    "color": "#00E5FF"
   }
 ]
 
