@@ -86,7 +86,8 @@ export const categories = [
         "icon": "🔄",
         "tag": "FTP"
       }
-    ]
+    ],
+    "iconKey": "FaCity"
   },
   {
     "id": "torrents",
@@ -159,7 +160,8 @@ export const categories = [
         "icon": "🍿",
         "tag": "Movies"
       }
-    ]
+    ],
+    "iconKey": "SiBittorrent"
   },
   {
     "id": "dflix",
@@ -192,7 +194,8 @@ export const categories = [
         "icon": "🇰🇷",
         "tag": "K-Drama"
       }
-    ]
+    ],
+    "iconKey": "SiNetflix"
   },
   {
     "id": "livetv",
@@ -249,7 +252,8 @@ export const categories = [
         "icon": "🎥",
         "tag": "TV"
       }
-    ]
+    ],
+    "iconKey": "FaSatelliteDish"
   },
   {
     "id": "sherpur",
@@ -330,7 +334,8 @@ export const categories = [
         "icon": "📡",
         "tag": "FTP"
       }
-    ]
+    ],
+    "iconKey": "FaBroadcastTower"
   },
   {
     "id": "universal",
@@ -435,15 +440,8 @@ export const categories = [
         "icon": "📺",
         "tag": "TV"
       }
-    ]
-  },
-  {
-    "id": "830zav4",
-    "servers": [],
-    "name": "Hasan Bhai",
-    "description": "",
-    "iconKey": "FaServer",
-    "color": "#00E5FF"
+    ],
+    "iconKey": "FaSatelliteDish"
   }
 ]
 
