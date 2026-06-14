@@ -102,7 +102,7 @@ export const categories = [
     "id": "torrents",
     "name": "Torrents",
     "icon": "🧲",
-    "color": "#FF4C4C",
+    "color": "#7B61FF",
     "description": "Torrent indexers, trackers and download portals",
     "servers": [
       {
@@ -111,7 +111,8 @@ export const categories = [
         "url": "https://www12.yts-official.to/",
         "description": "YTS — high quality movies in small file size",
         "icon": "🎬",
-        "tag": "Movies"
+        "tag": "Movies",
+        "iconKey": "FaMagnet"
       },
       {
         "id": "t2",
@@ -119,7 +120,8 @@ export const categories = [
         "url": "https://www.torrentbd.net/",
         "description": "TorrentBD — Bangladeshi torrent tracker & community",
         "icon": "🇧🇩",
-        "tag": "BD"
+        "tag": "BD",
+        "iconKey": "FaDownload"
       },
       {
         "id": "t3",
@@ -127,15 +129,8 @@ export const categories = [
         "url": "https://rarbg-official.is/",
         "description": "RARBG Official — movies, TV, games & software",
         "icon": "🧲",
-        "tag": "Tracker"
-      },
-      {
-        "id": "t5",
-        "name": "RARBG Movies",
-        "url": "https://en.rarbg-official.is/movies?",
-        "description": "RARBG Official — movies category browse",
-        "icon": "🎥",
-        "tag": "Movies"
+        "tag": "Tracker",
+        "iconKey": "FaArchive"
       },
       {
         "id": "t6",
@@ -143,7 +138,8 @@ export const categories = [
         "url": "https://www.1337x.tw/",
         "description": "1337x — popular torrent search engine & index",
         "icon": "🔍",
-        "tag": "Index"
+        "tag": "Index",
+        "iconKey": "FaWifi"
       },
       {
         "id": "t7",
@@ -151,7 +147,8 @@ export const categories = [
         "url": "https://thepiratebay.org/index.html",
         "description": "The Pirate Bay — the world's most resilient tracker",
         "icon": "🏴‍☠️",
-        "tag": "Tracker"
+        "tag": "Tracker",
+        "iconKey": "MdLocalMovies"
       },
       {
         "id": "t8",
@@ -159,7 +156,8 @@ export const categories = [
         "url": "https://www.chd4.com/index.php",
         "description": "CHD4 — HD movie torrents and releases",
         "icon": "💿",
-        "tag": "HD"
+        "tag": "HD",
+        "iconKey": "FaPlay"
       },
       {
         "id": "t9",
@@ -167,7 +165,8 @@ export const categories = [
         "url": "https://www.moviezmad.live/",
         "description": "MoviezMad — Bollywood, Hollywood & dubbed movies",
         "icon": "🍿",
-        "tag": "Movies"
+        "tag": "Movies",
+        "iconKey": "FaArchive"
       }
     ],
     "iconKey": "SiBittorrent"
@@ -185,7 +184,8 @@ export const categories = [
         "url": "http://stream.dflix.live:8096/web/index.html#!/home?tab=favorites",
         "description": "Dflix main streaming portal with favorites",
         "icon": "🎬",
-        "tag": "Streaming"
+        "tag": "Streaming",
+        "iconKey": "FaArchive"
       },
       {
         "id": "d2",
@@ -193,7 +193,8 @@ export const categories = [
         "url": "http://cdn.dflix.live:5050/",
         "description": "Dflix CDN content delivery server",
         "icon": "📦",
-        "tag": "CDN"
+        "tag": "CDN",
+        "iconKey": "FaHdd"
       },
       {
         "id": "d3",
@@ -201,7 +202,8 @@ export const categories = [
         "url": "http://cdn.dflix.live:5050/TV%20Series%20Dubbed/It's%20Okay%20to%20Not%20Be%20Okay/Season%201",
         "description": "It's Okay to Not Be Okay - Season 1",
         "icon": "🇰🇷",
-        "tag": "K-Drama"
+        "tag": "K-Drama",
+        "iconKey": "MdLiveTv"
       }
     ],
     "iconKey": "SiNetflix"
