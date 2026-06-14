@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Zap, Shield, Server } from 'lucide-react'
+import { Eye, EyeOff, Zap, Shield, Server, Sun, Moon } from 'lucide-react'
+import { useTheme, THEMES } from '../context/ThemeContext'
 
 const CORRECT_USER = '0000'
 const CORRECT_PASS = '0000'
@@ -103,7 +104,37 @@ const Football = ({ phase }) => (
   </AnimatePresence>
 )
 
+// ─── Theme Toggle Button ────────────────────────────────────────────
+function ThemeToggle({ theme, toggleTheme }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={toggleTheme}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.3 }}
+      whileTap={{ scale: 0.9 }}
+      title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Night Mode'}
+      style={{
+        position: 'fixed', top: 20, right: 20, zIndex: 50,
+        width: 44, height: 44, borderRadius: 14,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+        border: `1px solid ${theme === 'dark' ? 'rgba(0,229,255,0.25)' : 'rgba(0,0,0,0.1)'}`,
+        color: theme === 'dark' ? '#00E5FF' : '#7B61FF',
+        cursor: 'pointer', backdropFilter: 'blur(10px)',
+        boxShadow: theme === 'dark' ? '0 0 20px rgba(0,229,255,0.15)' : '0 4px 14px rgba(0,0,0,0.08)',
+      }}
+    >
+      {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+    </motion.button>
+  )
+}
+
 export default function Login({ onLogin }) {
+  const { theme, toggleTheme } = useTheme()
+  const t = THEMES[theme]
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -149,10 +180,11 @@ export default function Login({ onLogin }) {
   const handleMouseMove = (e) => {
     setMousePos({ x: (e.clientX / window.innerWidth) * 100, y: (e.clientY / window.innerHeight) * 100 })
   }
+
   const handleGuestLogin = () => {
-  localStorage.setItem('guestMode', 'true')
-  onLogin('guest')
-}
+    localStorage.setItem('guestMode', 'true')
+    onLogin('guest')
+  }
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -165,9 +197,10 @@ export default function Login({ onLogin }) {
     if (username === CORRECT_USER && password === CORRECT_PASS) {
       if (remember) localStorage.setItem('msp_remember', JSON.stringify({ u: username, p: password }))
       else localStorage.removeItem('msp_remember')
+      localStorage.setItem('guestMode', 'false')
       setSuccess(true)
       await new Promise(r => setTimeout(r, 1000))
-      onLogin()
+      onLogin('admin')
     } else {
       setLoading(false)
       setError('Invalid credentials. Try again.')
@@ -178,7 +211,11 @@ export default function Login({ onLogin }) {
     <div
       className="relative min-h-screen overflow-hidden animated-bg grid-pattern flex items-center justify-center"
       onMouseMove={handleMouseMove}
+      style={{ background: theme === 'dark' ? undefined : t.bgPrimary }}
     >
+      {/* Theme Toggle */}
+      <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+
       {/* Mouse glow */}
       <div
         className="mouse-glow"
@@ -212,8 +249,11 @@ export default function Login({ onLogin }) {
             <div
               className="glass-strong rounded-3xl p-8 shine"
               style={{
-                border: '1px solid rgba(0,229,255,0.2)',
-                boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,229,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
+                border: `1px solid ${theme === 'dark' ? 'rgba(0,229,255,0.2)' : 'rgba(0,0,0,0.08)'}`,
+                boxShadow: theme === 'dark'
+                  ? '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,229,255,0.1), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  : '0 30px 80px rgba(0,0,0,0.08), 0 0 60px rgba(0,229,255,0.05), inset 0 1px 0 rgba(255,255,255,0.6)',
+                background: theme === 'dark' ? undefined : t.glassBg,
               }}
             >
               {/* Header */}
@@ -251,7 +291,8 @@ export default function Login({ onLogin }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="text-sm text-gray-400 tracking-widest uppercase"
+                  className="text-sm tracking-widest uppercase"
+                  style={{ color: t.textMuted }}
                 >
                   Control Center Access
                 </motion.p>
@@ -260,7 +301,7 @@ export default function Login({ onLogin }) {
               {/* Form */}
               <form onSubmit={handleLogin} className="space-y-5">
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Username</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: t.textMuted }}>Username</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -268,11 +309,12 @@ export default function Login({ onLogin }) {
                       onChange={e => setUsername(e.target.value)}
                       placeholder="Enter username"
                       autoComplete="username"
-                      className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-600 text-sm font-medium transition-all duration-200"
+                      className="w-full px-4 py-3 rounded-xl placeholder-gray-600 text-sm font-medium transition-all duration-200"
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
+                        background: t.inputBg,
                         border: '1px solid rgba(0,229,255,0.15)',
                         outline: 'none',
+                        color: t.textBright,
                       }}
                       onFocus={e => e.target.style.border = '1px solid rgba(0,229,255,0.5)'}
                       onBlur={e => e.target.style.border = '1px solid rgba(0,229,255,0.15)'}
@@ -281,7 +323,7 @@ export default function Login({ onLogin }) {
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }}>
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Password</label>
+                  <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: t.textMuted }}>Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -289,11 +331,12 @@ export default function Login({ onLogin }) {
                       onChange={e => setPassword(e.target.value)}
                       placeholder="Enter password"
                       autoComplete="current-password"
-                      className="w-full px-4 py-3 pr-12 rounded-xl text-white placeholder-gray-600 text-sm font-medium transition-all duration-200"
+                      className="w-full px-4 py-3 pr-12 rounded-xl placeholder-gray-600 text-sm font-medium transition-all duration-200"
                       style={{
-                        background: 'rgba(255,255,255,0.05)',
+                        background: t.inputBg,
                         border: '1px solid rgba(0,229,255,0.15)',
                         outline: 'none',
+                        color: t.textBright,
                       }}
                       onFocus={e => e.target.style.border = '1px solid rgba(0,229,255,0.5)'}
                       onBlur={e => e.target.style.border = '1px solid rgba(0,229,255,0.15)'}
@@ -301,7 +344,8 @@ export default function Login({ onLogin }) {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                      style={{ color: t.textMuted }}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -315,13 +359,13 @@ export default function Login({ onLogin }) {
                     onClick={() => setRemember(!remember)}
                     className="relative w-5 h-5 rounded flex items-center justify-center transition-all"
                     style={{
-                      background: remember ? 'linear-gradient(135deg, #00E5FF, #7B61FF)' : 'rgba(255,255,255,0.05)',
-                      border: `1px solid ${remember ? '#00E5FF' : 'rgba(255,255,255,0.15)'}`,
+                      background: remember ? 'linear-gradient(135deg, #00E5FF, #7B61FF)' : t.inputBg,
+                      border: `1px solid ${remember ? '#00E5FF' : t.border}`,
                     }}
                   >
                     {remember && <span className="text-white text-xs font-bold">✓</span>}
                   </button>
-                  <span className="text-sm text-gray-400">Remember me</span>
+                  <span className="text-sm" style={{ color: t.textMuted }}>Remember me</span>
                 </motion.div>
 
                 {error && (
@@ -372,22 +416,23 @@ export default function Login({ onLogin }) {
                     </span>
                   )}
                 </motion.button>
+
                 <motion.button
-  type="button"
-  onClick={handleGuestLogin}
-  initial={{ opacity: 0, y: 10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.8 }}
-  whileTap={{ scale: 0.98 }}
-  className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300 mt-3"
-  style={{
-    background: 'rgba(255,255,255,0.08)',
-    border: '1px solid rgba(255,255,255,0.15)',
-    color: '#ffffff'
-  }}
->
-  Login As Guest
-</motion.button>
+                  type="button"
+                  onClick={handleGuestLogin}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300 mt-3"
+                  style={{
+                    background: theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                    border: `1px solid ${t.border}`,
+                    color: t.textBright,
+                  }}
+                >
+                  Login As Guest
+                </motion.button>
               </form>
 
               {/* Footer */}
@@ -395,7 +440,8 @@ export default function Login({ onLogin }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className="mt-6 text-center text-xs text-gray-600"
+                className="mt-6 text-center text-xs"
+                style={{ color: t.textFaint }}
               >
                 Secured Access Portal · Created by Hasan
               </motion.div>
@@ -411,7 +457,7 @@ export default function Login({ onLogin }) {
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.4 }}
             className="absolute inset-0 flex flex-col items-center justify-center z-30"
-            style={{ background: '#081120' }}
+            style={{ background: t.initBg }}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -430,7 +476,7 @@ export default function Login({ onLogin }) {
                 }}
               />
               <h2 className="text-2xl font-black tracking-widest gradient-text">INITIALIZING</h2>
-              <p className="text-gray-500 text-sm mt-2 tracking-widest">MY SERVER PAGE</p>
+              <p className="text-sm mt-2 tracking-widest" style={{ color: t.textMuted }}>MY SERVER PAGE</p>
             </motion.div>
           </motion.div>
         )}

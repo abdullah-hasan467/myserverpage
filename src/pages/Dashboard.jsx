@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Sun, Moon, Lock as LockIcon } from 'lucide-react'
+import { useTheme, THEMES } from '../context/ThemeContext'
 
 // ─── react-icons imports ─────────────────────────────────────────────
 import { FaHome, FaServer, FaFilm, FaTv, FaCity, FaGlobe, FaFolderOpen,
@@ -146,6 +148,46 @@ const saveCategories = (cats) => localStorage.setItem(LS_KEY, JSON.stringify(cat
 const loadFavorites  = () => { try { const d = localStorage.getItem(LS_FAV); return d ? JSON.parse(d) : [] } catch { return [] } }
 const saveFavorites  = (favs) => localStorage.setItem(LS_FAV, JSON.stringify(favs))
 
+// ─────────────────────────────────────────────────────────────────────
+// PERSISTENCE / "SAVE TO SERVER" NOTE
+//
+// Netlify only serves static files — it cannot write data back into your
+// source code or a database by itself. The functions below currently save
+// to the browser's localStorage (per-device, per-browser).
+//
+// If you want changes made by Hasan to be saved centrally (e.g. visible
+// from any device after deploying to Netlify), you need an external data
+// store. Two common options:
+//
+//   1. A small backend (Netlify Function + a database like Supabase,
+//      Firebase, or a JSON file in a GitHub repo via the GitHub API).
+//   2. A service like Supabase/Firebase Realtime DB — call their REST/SDK
+//      from `persistCategories` / `persistFavorites` below.
+//
+// To wire this up later, replace the body of `persistCategories` and
+// `persistFavorites` with a `fetch()` POST/PUT call to your backend, e.g.:
+//
+//   const persistCategories = async (cats) => {
+//     saveCategories(cats) // keep local cache for instant UI
+//     await fetch('/.netlify/functions/save-categories', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(cats),
+//     })
+//   }
+//
+// Until then, everything is saved locally via localStorage, which already
+// works fully when hosted on Netlify (it persists per browser/device).
+// ─────────────────────────────────────────────────────────────────────
+const persistCategories = (cats) => {
+  saveCategories(cats)
+  // TODO: add fetch() call here to push to your backend/Netlify function
+}
+const persistFavorites = (favs) => {
+  saveFavorites(favs)
+  // TODO: add fetch() call here to push to your backend/Netlify function
+}
+
 // ─── Toast ───────────────────────────────────────────────────────────
 function useToast() {
   const [toast, setToast] = useState(null)
@@ -185,7 +227,7 @@ function Toast({ toast }) {
 }
 
 // ─── Modal Base ───────────────────────────────────────────────────────
-function Modal({ open, onClose, title, children, width = 480 }) {
+function Modal({ open, onClose, title, children, width = 480, t }) {
   if (!open) return null
   return (
     <AnimatePresence>
@@ -204,15 +246,19 @@ function Modal({ open, onClose, title, children, width = 480 }) {
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={e => e.stopPropagation()}
           style={{
-            background: 'linear-gradient(135deg, #0d1f35 0%, #0a1628 100%)',
-            border: '1px solid rgba(0,229,255,0.2)',
+            background: t.theme === 'dark'
+              ? 'linear-gradient(135deg, #0d1f35 0%, #0a1628 100%)'
+              : 'linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%)',
+            border: `1px solid ${t.theme === 'dark' ? 'rgba(0,229,255,0.2)' : 'rgba(0,0,0,0.08)'}`,
             borderRadius: 20, padding: 28, width: '100%', maxWidth: width,
-            boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(0,229,255,0.08)',
+            boxShadow: t.theme === 'dark'
+              ? '0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(0,229,255,0.08)'
+              : '0 30px 80px rgba(0,0,0,0.12), 0 0 40px rgba(0,229,255,0.05)',
             maxHeight: '90vh', overflowY: 'auto',
           }}
         >
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 22 }}>
-            <h3 style={{ color: '#fff', fontWeight: 800, fontSize: 17, margin: 0 }}>{title}</h3>
+            <h3 style={{ color: t.textBright, fontWeight: 800, fontSize: 17, margin: 0 }}>{title}</h3>
             <button onClick={onClose} style={{
               background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 10, padding: '6px 10px', cursor: 'pointer', color: '#aaa',
@@ -229,7 +275,7 @@ function Modal({ open, onClose, title, children, width = 480 }) {
 }
 
 // ─── Form Input ───────────────────────────────────────────────────────
-function FormInput({ label, value, onChange, placeholder, type = 'text', required }) {
+function FormInput({ label, value, onChange, placeholder, type = 'text', required, t }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#888', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom: 7 }}>
@@ -240,8 +286,8 @@ function FormInput({ label, value, onChange, placeholder, type = 'text', require
         placeholder={placeholder}
         style={{
           width:'100%', padding:'10px 14px', borderRadius:12, fontSize:13,
-          background:'rgba(255,255,255,0.05)', border:'1px solid rgba(0,229,255,0.15)',
-          color:'#fff', outline:'none', boxSizing:'border-box', transition:'border .2s',
+          background: t.inputBg, border:'1px solid rgba(0,229,255,0.15)',
+          color: t.textBright, outline:'none', boxSizing:'border-box', transition:'border .2s',
           fontFamily:'inherit',
         }}
         onFocus={e=>e.target.style.border='1px solid rgba(0,229,255,0.5)'}
@@ -298,7 +344,7 @@ function ColorPicker({ value, onChange }) {
 }
 
 // ─── Add/Edit Server Modal ────────────────────────────────────────────
-function ServerModal({ open, onClose, onSave, initial, title }) {
+function ServerModal({ open, onClose, onSave, initial, title, t }) {
   const [name, setName]       = useState(initial?.name || '')
   const [url, setUrl]         = useState(initial?.url || '')
   const [desc, setDesc]       = useState(initial?.description || '')
@@ -319,11 +365,11 @@ function ServerModal({ open, onClose, onSave, initial, title }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={title || 'Add Server'}>
-      <FormInput label="Server Name" value={name} onChange={setName} placeholder="e.g. My FTP Server" required />
-      <FormInput label="URL" value={url} onChange={setUrl} placeholder="https://example.com" required />
-      <FormInput label="Description" value={desc} onChange={setDesc} placeholder="Short description..." />
-      <FormInput label="Tag" value={tag} onChange={setTag} placeholder="FTP, Movies, TV..." />
+    <Modal open={open} onClose={onClose} title={title || 'Add Server'} t={t}>
+      <FormInput label="Server Name" value={name} onChange={setName} placeholder="e.g. My FTP Server" required t={t} />
+      <FormInput label="URL" value={url} onChange={setUrl} placeholder="https://example.com" required t={t} />
+      <FormInput label="Description" value={desc} onChange={setDesc} placeholder="Short description..." t={t} />
+      <FormInput label="Tag" value={tag} onChange={setTag} placeholder="FTP, Movies, TV..." t={t} />
       <IconPicker value={iconKey} onChange={setIconKey} />
       <div style={{ display:'flex', gap:10, marginTop:8 }}>
         <button onClick={onClose} style={{
@@ -344,7 +390,7 @@ function ServerModal({ open, onClose, onSave, initial, title }) {
 }
 
 // ─── Add/Edit Category Modal ──────────────────────────────────────────
-function CategoryModal({ open, onClose, onSave, initial, title }) {
+function CategoryModal({ open, onClose, onSave, initial, title, t }) {
   const [name, setName]       = useState(initial?.name || '')
   const [desc, setDesc]       = useState(initial?.description || '')
   const [iconKey, setIconKey] = useState(initial?.iconKey || 'FaServer')
@@ -363,9 +409,9 @@ function CategoryModal({ open, onClose, onSave, initial, title }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={title || 'Add Category'}>
-      <FormInput label="Category Name" value={name} onChange={setName} placeholder="e.g. My Servers" required />
-      <FormInput label="Description" value={desc} onChange={setDesc} placeholder="Short description..." />
+    <Modal open={open} onClose={onClose} title={title || 'Add Category'} t={t}>
+      <FormInput label="Category Name" value={name} onChange={setName} placeholder="e.g. My Servers" required t={t} />
+      <FormInput label="Description" value={desc} onChange={setDesc} placeholder="Short description..." t={t} />
       <ColorPicker value={color} onChange={setColor} />
       <IconPicker value={iconKey} onChange={setIconKey} />
       <div style={{ display:'flex', gap:10, marginTop:8 }}>
@@ -387,9 +433,9 @@ function CategoryModal({ open, onClose, onSave, initial, title }) {
 }
 
 // ─── Confirm Delete Modal ─────────────────────────────────────────────
-function ConfirmModal({ open, onClose, onConfirm, message }) {
+function ConfirmModal({ open, onClose, onConfirm, message, t }) {
   return (
-    <Modal open={open} onClose={onClose} title="Confirm Delete" width={380}>
+    <Modal open={open} onClose={onClose} title="Confirm Delete" width={380} t={t}>
       <p style={{ color:'#aaa', fontSize:14, marginBottom:22, lineHeight:1.6 }}>{message}</p>
       <div style={{ display:'flex', gap:10 }}>
         <button onClick={onClose} style={{
@@ -408,13 +454,13 @@ function ConfirmModal({ open, onClose, onConfirm, message }) {
 }
 
 // ─── Server Card ──────────────────────────────────────────────────────
-function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onDelete, showToast }) {
+function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onDelete, showToast, t }) {
   const [hovered, setHovered] = useState(false)
   const [copied, setCopied]   = useState(false)
 
   const handleCopy = (e) => {
     e.stopPropagation()
-    if (isGuest) { showToast('Copy disabled in Guest mode', 'error'); return }
+    if (isGuest) { showToast('Copy disabled — No Write Access (Guest)', 'error'); return }
     navigator.clipboard.writeText(server.url).then(() => {
       setCopied(true); showToast('URL copied!');
       setTimeout(() => setCopied(false), 2000)
@@ -422,13 +468,13 @@ function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onD
   }
 
   const handleOpen = () => {
-    if (isGuest) { showToast('Navigation disabled in Guest mode', 'error'); return }
+    if (isGuest) { showToast('Navigation disabled — No Write Access (Guest)', 'error'); return }
     window.open(server.url, '_blank', 'noopener,noreferrer')
   }
 
   const handleFav = (e) => {
     e.stopPropagation()
-    if (isGuest) { showToast('Favorites disabled in Guest mode', 'error'); return }
+    if (isGuest) { showToast('Favorites disabled — No Write Access (Guest)', 'error'); return }
     onToggleFav(server)
   }
 
@@ -440,8 +486,8 @@ function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onD
       onMouseLeave={() => setHovered(false)}
       onClick={handleOpen}
       style={{
-        background: hovered ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-        border: hovered ? `1px solid ${catColor}55` : '1px solid rgba(255,255,255,0.07)',
+        background: hovered ? t.cardBgHover : t.cardBg,
+        border: hovered ? `1px solid ${catColor}55` : `1px solid ${t.border}`,
         borderRadius: 16, padding: '16px 16px 14px',
         cursor: isGuest ? 'not-allowed' : 'pointer',
         transition: 'all .22s', position:'relative', overflow:'hidden',
@@ -467,17 +513,17 @@ function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onD
           <Icon name={server.iconKey} size={18} color={catColor} />
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:700, fontSize:13.5, color:'#f0f0f0', marginBottom:3, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <div style={{ fontWeight:700, fontSize:13.5, color:t.textBright, marginBottom:3, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {server.name}
           </div>
-          <div style={{ fontSize:10.5, color:'#555', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <div style={{ fontSize:10.5, color:t.textMuted, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {server.url}
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <p style={{ fontSize:12, color:'#666', lineHeight:1.5, marginBottom:12, minHeight:32,
+      <p style={{ fontSize:12, color:t.textMuted, lineHeight:1.5, marginBottom:12, minHeight:32,
         display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
         {server.description}
       </p>
@@ -493,11 +539,11 @@ function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onD
 
         <div style={{ display:'flex', gap:4 }} onClick={e => e.stopPropagation()}>
           {/* Copy */}
-          <ActionBtn onClick={handleCopy} title={isGuest ? 'Disabled in Guest mode' : 'Copy URL'} disabled={isGuest}>
+          <ActionBtn onClick={handleCopy} title={isGuest ? 'No Write Access (Guest)' : 'Copy URL'} disabled={isGuest}>
             {copied ? <FaCheck size={11} color="#00ff88"/> : <FaCopy size={11} color={isGuest?'#444':'#888'}/>}
           </ActionBtn>
           {/* Favorite */}
-          <ActionBtn onClick={handleFav} title={isGuest ? 'Disabled in Guest mode' : (isFav ? 'Unfavorite' : 'Favorite')} disabled={isGuest}>
+          <ActionBtn onClick={handleFav} title={isGuest ? 'No Write Access (Guest)' : (isFav ? 'Unfavorite' : 'Favorite')} disabled={isGuest}>
             <FaStar size={11} color={isGuest ? '#444' : (isFav ? '#FFD700' : '#888')} style={isFav&&!isGuest?{filter:'drop-shadow(0 0 4px #FFD700)'}:{}}/>
           </ActionBtn>
           {/* Edit — Hasan only */}
@@ -513,7 +559,7 @@ function ServerCard({ server, catColor, isGuest, isFav, onToggleFav, onEdit, onD
             </ActionBtn>
           )}
           {/* Open link */}
-          <ActionBtn onClick={handleOpen} title={isGuest ? 'Disabled in Guest mode' : 'Open link'} disabled={isGuest}>
+          <ActionBtn onClick={handleOpen} title={isGuest ? 'No Write Access (Guest)' : 'Open link'} disabled={isGuest}>
             <FaExternalLinkAlt size={11} color={isGuest?'#444':'#888'}/>
           </ActionBtn>
         </div>
@@ -542,7 +588,7 @@ function ActionBtn({ onClick, title, disabled, children }) {
 }
 
 // ─── Category Section ─────────────────────────────────────────────────
-function CategorySection({ category, isGuest, favorites, onToggleFav, onEditServer, onDeleteServer, onAddServer, onEditCategory, onDeleteCategory, showToast }) {
+function CategorySection({ category, isGuest, favorites, onToggleFav, onEditServer, onDeleteServer, onAddServer, onEditCategory, onDeleteCategory, showToast, t }) {
   return (
     <section style={{ marginBottom: 40 }}>
       {/* Header */}
@@ -555,8 +601,8 @@ function CategorySection({ category, isGuest, favorites, onToggleFav, onEditServ
           <Icon name={category.iconKey} size={18} color={category.color}/>
         </div>
         <div style={{ flex:1 }}>
-          <h2 style={{ margin:0, fontSize:15, fontWeight:800, color:'#f0f0f0' }}>{category.name}</h2>
-          <p style={{ margin:0, fontSize:11.5, color:'#555' }}>{category.description}</p>
+          <h2 style={{ margin:0, fontSize:15, fontWeight:800, color:t.textBright }}>{category.name}</h2>
+          <p style={{ margin:0, fontSize:11.5, color:t.textMuted }}>{category.description}</p>
         </div>
         <div style={{
           fontSize:11, fontWeight:700, padding:'3px 12px', borderRadius:20,
@@ -593,6 +639,7 @@ function CategorySection({ category, isGuest, favorites, onToggleFav, onEditServ
             onEdit={(s) => onEditServer(category.id, s)}
             onDelete={(s) => onDeleteServer(category.id, s)}
             showToast={showToast}
+            t={t}
           />
         ))}
       </div>
@@ -601,7 +648,7 @@ function CategorySection({ category, isGuest, favorites, onToggleFav, onEditServ
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────
-function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, collapsed, setCollapsed }) {
+function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, collapsed, setCollapsed, t }) {
   const navItem = (id, label, iconName, color) => {
     const active = activeView === id
     return (
@@ -614,11 +661,11 @@ function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, col
           justifyContent: collapsed ? 'center' : 'flex-start',
           borderRadius:11, marginBottom:3, border:'none', cursor:'pointer', transition:'all .18s',
           background: active ? `${color || '#00E5FF'}18` : 'transparent',
-          color: active ? (color || '#00E5FF') : '#666',
+          color: active ? (color || '#00E5FF') : t.textMuted,
           borderLeft: active ? `2px solid ${color || '#00E5FF'}` : '2px solid transparent',
         }}
         onMouseEnter={e=>{ if(!active){ e.currentTarget.style.background='rgba(255,255,255,0.05)'; e.currentTarget.style.color='#bbb' }}}
-        onMouseLeave={e=>{ if(!active){ e.currentTarget.style.background='transparent'; e.currentTarget.style.color='#666' }}}
+        onMouseLeave={e=>{ if(!active){ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=t.textMuted }}}
         title={collapsed ? label : ''}
       >
         <Icon name={iconName} size={15} color={active ? (color||'#00E5FF') : undefined}/>
@@ -630,13 +677,13 @@ function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, col
   return (
     <div style={{
       width: collapsed ? 54 : 220, flexShrink:0, height:'100vh',
-      background:'rgba(6,14,26,0.98)', borderRight:'1px solid rgba(0,229,255,0.08)',
+      background: t.sidebarBg, borderRight:`1px solid ${t.border}`,
       display:'flex', flexDirection:'column', transition:'width .25s ease',
       backdropFilter:'blur(20px)', overflowX:'hidden', overflowY:'auto',
     }}>
       {/* Logo */}
       <div style={{
-        padding: collapsed ? '18px 0' : '18px 16px', borderBottom:'1px solid rgba(255,255,255,0.05)',
+        padding: collapsed ? '18px 0' : '18px 16px', borderBottom:`1px solid ${t.border}`,
         display:'flex', alignItems:'center', gap:10, justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
         <div style={{
@@ -648,22 +695,22 @@ function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, col
         {!collapsed && (
           <div>
             <div style={{ fontSize:12, fontWeight:900, background:'linear-gradient(90deg,#00E5FF,#7B61FF)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', letterSpacing:'0.05em' }}>MY SERVER</div>
-            <div style={{ fontSize:9, color:'#444', fontWeight:700, letterSpacing:'0.1em' }}>PORTAL v1.0</div>
+            <div style={{ fontSize:9, color:t.textFaint, fontWeight:700, letterSpacing:'0.1em' }}>PORTAL v1.0</div>
           </div>
         )}
       </div>
 
       {/* Collapse toggle */}
-      <div style={{ padding:'8px', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ padding:'8px', borderBottom:`1px solid ${t.border}` }}>
         <button
           onClick={() => setCollapsed(!collapsed)}
           style={{
-            width:'100%', padding:'7px 0', borderRadius:9, border:'1px solid rgba(255,255,255,0.07)',
-            background:'rgba(255,255,255,0.04)', color:'#555', cursor:'pointer', transition:'all .2s',
+            width:'100%', padding:'7px 0', borderRadius:9, border:`1px solid ${t.border}`,
+            background:'rgba(255,255,255,0.04)', color:t.textMuted, cursor:'pointer', transition:'all .2s',
             display:'flex', alignItems:'center', justifyContent:'center',
           }}
           onMouseEnter={e=>{e.currentTarget.style.color='#aaa';e.currentTarget.style.background='rgba(255,255,255,0.08)'}}
-          onMouseLeave={e=>{e.currentTarget.style.color='#555';e.currentTarget.style.background='rgba(255,255,255,0.04)'}}
+          onMouseLeave={e=>{e.currentTarget.style.color=t.textMuted;e.currentTarget.style.background='rgba(255,255,255,0.04)'}}
         >
           <FaBars size={12}/>
         </button>
@@ -671,18 +718,18 @@ function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, col
 
       {/* Nav */}
       <div style={{ padding:'10px 8px', flex:1 }}>
-        {!collapsed && <div style={{ fontSize:9, color:'#333', fontWeight:800, letterSpacing:'0.15em', textTransform:'uppercase', margin:'4px 6px 8px' }}>Navigation</div>}
+        {!collapsed && <div style={{ fontSize:9, color:t.textFaint, fontWeight:800, letterSpacing:'0.15em', textTransform:'uppercase', margin:'4px 6px 8px' }}>Navigation</div>}
         {navItem('dashboard', 'Home', 'FaHome', '#00E5FF')}
         {navItem('search', 'Search', 'FaSearch', '#7B61FF')}
         {!isGuest && navItem('favorites', 'Favorites', 'FaStar', '#FFD700')}
         {navItem('recent', 'Recent', 'FaClock', '#00FF88')}
 
-        {!collapsed && <div style={{ fontSize:9, color:'#333', fontWeight:800, letterSpacing:'0.15em', textTransform:'uppercase', margin:'16px 6px 8px' }}>Categories</div>}
+        {!collapsed && <div style={{ fontSize:9, color:t.textFaint, fontWeight:800, letterSpacing:'0.15em', textTransform:'uppercase', margin:'16px 6px 8px' }}>Categories</div>}
         {categories.map(cat => navItem(`cat_${cat.id}`, cat.name, cat.iconKey, cat.color))}
       </div>
 
       {/* Logout */}
-      <div style={{ padding:'10px 8px', borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ padding:'10px 8px', borderTop:`1px solid ${t.border}` }}>
         <button
           onClick={onLogout}
           style={{
@@ -705,7 +752,7 @@ function Sidebar({ categories, activeView, setActiveView, onLogout, isGuest, col
 }
 
 // ─── Stats Bar ────────────────────────────────────────────────────────
-function StatsBar({ categories, favCount }) {
+function StatsBar({ categories, favCount, t }) {
   const total = categories.reduce((a, c) => a + c.servers.length, 0)
   const stats = [
     { label:'Categories', value: categories.length, icon:'FaFilter', color:'#7B61FF' },
@@ -716,15 +763,15 @@ function StatsBar({ categories, favCount }) {
     <div style={{ display:'flex', gap:14, padding:'0 24px 24px', flexWrap:'wrap' }}>
       {stats.map(s => (
         <div key={s.label} style={{
-          flex:'1 1 140px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)',
+          flex:'1 1 140px', background:t.cardBg, border:`1px solid ${t.border}`,
           borderRadius:14, padding:'14px 18px', display:'flex', alignItems:'center', gap:12,
         }}>
           <div style={{ width:36, height:36, borderRadius:11, background:`${s.color}18`, border:`1px solid ${s.color}33`, display:'flex', alignItems:'center', justifyContent:'center' }}>
             <Icon name={s.icon} size={16} color={s.color}/>
           </div>
           <div>
-            <div style={{ fontSize:20, fontWeight:900, color:'#f0f0f0', lineHeight:1 }}>{s.value}</div>
-            <div style={{ fontSize:11, color:'#555', marginTop:2 }}>{s.label}</div>
+            <div style={{ fontSize:20, fontWeight:900, color:t.textBright, lineHeight:1 }}>{s.value}</div>
+            <div style={{ fontSize:11, color:t.textMuted, marginTop:2 }}>{s.label}</div>
           </div>
         </div>
       ))}
@@ -733,7 +780,7 @@ function StatsBar({ categories, favCount }) {
 }
 
 // ─── Search View ──────────────────────────────────────────────────────
-function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer, onDeleteServer, showToast }) {
+function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer, onDeleteServer, showToast, t }) {
   const [query, setQuery] = useState('')
 
   const results = query.trim()
@@ -752,35 +799,35 @@ function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer,
     <div style={{ padding:'24px' }}>
       {/* Search box */}
       <div style={{ position:'relative', marginBottom:24, maxWidth:500 }}>
-        <FaSearch size={15} color="#555" style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }}/>
+        <FaSearch size={15} color={t.textMuted} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }}/>
         <input
           autoFocus
           value={query} onChange={e => setQuery(e.target.value)}
           placeholder="Search servers, tags, URLs..."
           style={{
             width:'100%', padding:'12px 14px 12px 42px', borderRadius:14, fontSize:14,
-            background:'rgba(255,255,255,0.05)', border:'1px solid rgba(0,229,255,0.2)',
-            color:'#fff', outline:'none', boxSizing:'border-box', fontFamily:'inherit',
+            background:t.inputBg, border:'1px solid rgba(0,229,255,0.2)',
+            color:t.textBright, outline:'none', boxSizing:'border-box', fontFamily:'inherit',
           }}
           onFocus={e=>e.target.style.border='1px solid rgba(0,229,255,0.5)'}
           onBlur={e=>e.target.style.border='1px solid rgba(0,229,255,0.2)'}
         />
         {query && (
-          <button onClick={() => setQuery('')} style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'#555', cursor:'pointer', padding:4 }}>
+          <button onClick={() => setQuery('')} style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:t.textMuted, cursor:'pointer', padding:4 }}>
             <FaTimes size={13}/>
           </button>
         )}
       </div>
 
       {query.trim() === '' && (
-        <div style={{ textAlign:'center', padding:'60px 0', color:'#444' }}>
+        <div style={{ textAlign:'center', padding:'60px 0', color:t.textFaint }}>
           <FaSearch size={40} style={{ marginBottom:12, opacity:0.3 }}/>
           <p style={{ margin:0, fontSize:14 }}>Type to search across all servers</p>
         </div>
       )}
 
       {query.trim() !== '' && results.length === 0 && (
-        <div style={{ textAlign:'center', padding:'60px 0', color:'#444' }}>
+        <div style={{ textAlign:'center', padding:'60px 0', color:t.textFaint }}>
           <FaSearch size={40} style={{ marginBottom:12, opacity:0.3 }}/>
           <p style={{ margin:0, fontSize:14 }}>No results for "<span style={{color:'#00E5FF'}}>{query}</span>"</p>
         </div>
@@ -788,7 +835,7 @@ function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer,
 
       {results.length > 0 && (
         <>
-          <p style={{ color:'#555', fontSize:12, marginBottom:16 }}>{results.length} result{results.length!==1?'s':''} found</p>
+          <p style={{ color:t.textMuted, fontSize:12, marginBottom:16 }}>{results.length} result{results.length!==1?'s':''} found</p>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px,1fr))', gap:14 }}>
             {results.map(srv => (
               <ServerCard
@@ -798,6 +845,7 @@ function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer,
                 onEdit={(s) => onEditServer(srv._catId, s)}
                 onDelete={(s) => onDeleteServer(srv._catId, s)}
                 showToast={showToast}
+                t={t}
               />
             ))}
           </div>
@@ -808,12 +856,12 @@ function SearchView({ categories, isGuest, favorites, onToggleFav, onEditServer,
 }
 
 // ─── Favorites View ───────────────────────────────────────────────────
-function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDeleteServer, showToast, isGuest }) {
+function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDeleteServer, showToast, isGuest, t }) {
   if (isGuest) return (
-    <div style={{ textAlign:'center', padding:'80px 24px', color:'#444' }}>
+    <div style={{ textAlign:'center', padding:'80px 24px', color:t.textFaint }}>
       <FaLock size={44} style={{ marginBottom:14, opacity:0.2 }}/>
-      <h3 style={{ margin:'0 0 8px', color:'#555', fontWeight:700 }}>Favorites Unavailable</h3>
-      <p style={{ margin:0, fontSize:13 }}>Favorites are disabled in Guest mode.</p>
+      <h3 style={{ margin:'0 0 8px', color:t.textMuted, fontWeight:700 }}>Favorites Unavailable</h3>
+      <p style={{ margin:0, fontSize:13 }}>Favorites are disabled — No Write Access (Guest).</p>
     </div>
   )
 
@@ -822,9 +870,9 @@ function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDel
   )
 
   if (favServers.length === 0) return (
-    <div style={{ textAlign:'center', padding:'80px 24px', color:'#444' }}>
+    <div style={{ textAlign:'center', padding:'80px 24px', color:t.textFaint }}>
       <FaStar size={44} style={{ marginBottom:14, opacity:0.2 }}/>
-      <h3 style={{ margin:'0 0 8px', color:'#555', fontWeight:700 }}>No Favorites Yet</h3>
+      <h3 style={{ margin:'0 0 8px', color:t.textMuted, fontWeight:700 }}>No Favorites Yet</h3>
       <p style={{ margin:0, fontSize:13 }}>Click ⭐ on any server card to save it here</p>
     </div>
   )
@@ -833,8 +881,8 @@ function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDel
     <div style={{ padding:'24px' }}>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
         <FaStar size={18} color="#FFD700" style={{ filter:'drop-shadow(0 0 6px #FFD700)' }}/>
-        <h2 style={{ margin:0, fontSize:16, fontWeight:800, color:'#f0f0f0' }}>Favorites</h2>
-        <span style={{ fontSize:13, color:'#555' }}>({favServers.length})</span>
+        <h2 style={{ margin:0, fontSize:16, fontWeight:800, color:t.textBright }}>Favorites</h2>
+        <span style={{ fontSize:13, color:t.textMuted }}>({favServers.length})</span>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px,1fr))', gap:14 }}>
         {favServers.map(srv => (
@@ -845,6 +893,7 @@ function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDel
             onEdit={(s) => onEditServer(srv._catId, s)}
             onDelete={(s) => onDeleteServer(srv._catId, s)}
             showToast={showToast}
+            t={t}
           />
         ))}
       </div>
@@ -853,7 +902,7 @@ function FavoritesView({ categories, favorites, onToggleFav, onEditServer, onDel
 }
 
 // ─── Recent View ──────────────────────────────────────────────────────
-function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, onDeleteServer, showToast, isGuest }) {
+function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, onDeleteServer, showToast, isGuest, t }) {
   const recentServers = recent.map(id => {
     for (const c of categories) {
       const s = c.servers.find(x => x.id === id)
@@ -863,9 +912,9 @@ function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, 
   }).filter(Boolean)
 
   if (recentServers.length === 0) return (
-    <div style={{ textAlign:'center', padding:'80px 24px', color:'#444' }}>
+    <div style={{ textAlign:'center', padding:'80px 24px', color:t.textFaint }}>
       <FaClock size={44} style={{ marginBottom:14, opacity:0.2 }}/>
-      <h3 style={{ margin:'0 0 8px', color:'#555', fontWeight:700 }}>No Recent Activity</h3>
+      <h3 style={{ margin:'0 0 8px', color:t.textMuted, fontWeight:700 }}>No Recent Activity</h3>
       <p style={{ margin:0, fontSize:13 }}>Servers you open will appear here</p>
     </div>
   )
@@ -874,7 +923,7 @@ function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, 
     <div style={{ padding:'24px' }}>
       <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
         <FaClock size={18} color="#00E5FF"/>
-        <h2 style={{ margin:0, fontSize:16, fontWeight:800, color:'#f0f0f0' }}>Recently Opened</h2>
+        <h2 style={{ margin:0, fontSize:16, fontWeight:800, color:t.textBright }}>Recently Opened</h2>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(260px,1fr))', gap:14 }}>
         {recentServers.map(srv => (
@@ -885,6 +934,7 @@ function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, 
             onEdit={(s) => onEditServer(srv._catId, s)}
             onDelete={(s) => onDeleteServer(srv._catId, s)}
             showToast={showToast}
+            t={t}
           />
         ))}
       </div>
@@ -893,12 +943,12 @@ function RecentView({ recent, categories, favorites, onToggleFav, onEditServer, 
 }
 
 // ─── Hero Section ─────────────────────────────────────────────────────
-function HeroSection({ isGuest, onNav }) {
+function HeroSection({ isGuest, onNav, t }) {
   return (
     <div style={{
       padding:'36px 24px 24px',
       background:'linear-gradient(180deg, rgba(0,229,255,0.04) 0%, transparent 100%)',
-      borderBottom:'1px solid rgba(0,229,255,0.06)', marginBottom:8,
+      borderBottom:`1px solid ${t.border}`, marginBottom:8,
     }}>
       <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
         <div>
@@ -908,9 +958,9 @@ function HeroSection({ isGuest, onNav }) {
           }}>
             MY SERVER PAGE
           </h1>
-          <p style={{ margin:'6px 0 0', fontSize:13, color:'#555' }}>
+          <p style={{ margin:'6px 0 0', fontSize:13, color:t.textMuted }}>
             {isGuest
-              ? 'Browsing in Guest · Read Only mode — navigation and writes are disabled.'
+              ? 'Browsing as Guest · No Write Access — navigation and writes are disabled.'
               : 'Welcome back, Hasan. Full write access enabled.'}
           </p>
         </div>
@@ -936,25 +986,29 @@ function HeroSection({ isGuest, onNav }) {
   )
 }
 
-// ─── User Badge (top bar) ─────────────────────────────────────────────
-function UserBadge({ isGuest }) {
+// ─── User Badge (top bar) ──────────────────────────────────────────────
+// Shows "Hasan · Admin" when logged in with the admin credentials,
+// and "Guest · No Write Access" when in guest mode.
+function UserBadge({ isGuest, t }) {
   return (
     <div style={{
       display:'flex', alignItems:'center', gap:8, padding:'6px 12px', borderRadius:12,
       background: isGuest ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg,rgba(0,229,255,0.12),rgba(123,97,255,0.12))',
-      border: `1px solid ${isGuest ? 'rgba(255,255,255,0.08)' : 'rgba(0,229,255,0.28)'}`,
+      border: `1px solid ${isGuest ? t.border : 'rgba(0,229,255,0.28)'}`,
     }}>
       {isGuest ? <FaGhost size={13} color="#777"/> : <FaUser size={13} color="#00E5FF"/>}
-      <span style={{ fontSize:12, fontWeight:700, color: isGuest ? '#666' : '#00E5FF', letterSpacing:'0.06em' }}>
-        {isGuest ? 'Ghost' : 'Hasan'}
+      <span style={{ fontSize:12, fontWeight:700, color: isGuest ? t.textMuted : '#00E5FF', letterSpacing:'0.06em' }}>
+        {isGuest ? 'Guest' : 'Hasan'}
       </span>
-      {isGuest && (
+      {isGuest ? (
         <span style={{
-          fontSize:9, fontWeight:600, color:'#444', background:'rgba(255,255,255,0.05)',
+          fontSize:9, fontWeight:600, color: t.textMuted, background:'rgba(255,255,255,0.05)',
           padding:'2px 6px', borderRadius:4, letterSpacing:'0.1em', textTransform:'uppercase',
-        }}>Read Only</span>
-      )}
-      {!isGuest && (
+          display:'flex', alignItems:'center', gap:4,
+        }}>
+          <LockIcon size={9}/> No Write Access
+        </span>
+      ) : (
         <span style={{
           fontSize:9, fontWeight:600, color:'#00E5FF', background:'rgba(0,229,255,0.1)',
           padding:'2px 6px', borderRadius:4, letterSpacing:'0.1em', textTransform:'uppercase',
@@ -977,15 +1031,37 @@ function GuestBanner() {
     >
       <FaGhost size={14} color="#FF8C00" style={{ flexShrink:0 }}/>
       <span>
-        You're browsing as <strong style={{ color:'#FF8C00' }}>Ghost · Read Only</strong>. 
+        You're browsing as <strong style={{ color:'#FF8C00' }}>Guest · No Write Access</strong>.
         Copy, Favorite, Navigate to links, and all write actions are disabled.
       </span>
     </motion.div>
   )
 }
 
+// ─── Theme Toggle (Dashboard) ───────────────────────────────────────
+function ThemeToggleBtn({ theme, toggleTheme }) {
+  return (
+    <button
+      onClick={toggleTheme}
+      title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Night Mode'}
+      style={{
+        display:'flex', alignItems:'center', gap:7, padding:'7px 10px', borderRadius:10,
+        background: theme === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+        border: `1px solid ${theme === 'dark' ? 'rgba(0,229,255,0.18)' : 'rgba(0,0,0,0.08)'}`,
+        color: theme === 'dark' ? '#00E5FF' : '#7B61FF',
+        cursor:'pointer', fontSize:12, transition:'all .2s',
+      }}
+    >
+      {theme === 'dark' ? <Sun size={14}/> : <Moon size={14}/>}
+    </button>
+  )
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────
 export default function Dashboard({ onLogout, role }) {
+  const { theme, toggleTheme } = useTheme()
+  const t = { ...THEMES[theme], theme }
+
   const isGuest = role === 'guest'
   const [categories, setCategories] = useState(loadCategories)
   const [favorites, setFavorites]   = useState(loadFavorites)
@@ -1002,9 +1078,10 @@ export default function Dashboard({ onLogout, role }) {
   const [editCatModal,    setEditCatModal]    = useState({ open:false, category:null })
   const [delCatModal,     setDelCatModal]     = useState({ open:false, category:null })
 
-  // Persist
-  useEffect(() => saveCategories(categories), [categories])
-  useEffect(() => saveFavorites(favorites), [favorites])
+  // Persist — saves locally (and to a backend if you wire one up, see
+  // persistCategories / persistFavorites above)
+  useEffect(() => persistCategories(categories), [categories])
+  useEffect(() => persistFavorites(favorites), [favorites])
 
   // ── Favorite toggle ──
   const handleToggleFav = (server) => {
@@ -1013,59 +1090,64 @@ export default function Dashboard({ onLogout, role }) {
       prev.includes(server.id) ? prev.filter(id => id !== server.id) : [server.id, ...prev]
     )
     showToast(favorites.includes(server.id) ? 'Removed from favorites' : 'Added to favorites')
-    // track recent when opening (called from ServerCard click)
   }
 
   // ── Add Server ──
   const handleAddServer = (catId, data) => {
+    if (isGuest) return
     const newSrv = { id: uid(), ...data }
     setCategories(prev => prev.map(c => c.id === catId ? { ...c, servers: [...c.servers, newSrv] } : c))
     setAddServerModal({ open:false, catId:null })
-    showToast(`Server "${data.name}" added!`)
+    showToast(`Server "${data.name}" added & saved!`)
   }
 
   // ── Edit Server ──
   const handleEditServer = (catId, data) => {
+    if (isGuest) return
     setCategories(prev => prev.map(c => c.id === catId
       ? { ...c, servers: c.servers.map(s => s.id === editServerModal.server.id ? { ...s, ...data } : s) }
       : c
     ))
     setEditServerModal({ open:false, catId:null, server:null })
-    showToast('Server updated!')
+    showToast('Server updated & saved!')
   }
 
   // ── Delete Server ──
   const handleDeleteServer = () => {
+    if (isGuest) return
     const { catId, server } = delServerModal
     setCategories(prev => prev.map(c => c.id === catId ? { ...c, servers: c.servers.filter(s => s.id !== server.id) } : c))
     setFavorites(prev => prev.filter(id => id !== server.id))
     setDelServerModal({ open:false, catId:null, server:null })
-    showToast('Server deleted')
+    showToast('Server deleted & saved')
   }
 
   // ── Add Category ──
   const handleAddCategory = (data) => {
+    if (isGuest) return
     const newCat = { id: uid(), servers: [], ...data }
     setCategories(prev => [...prev, newCat])
     setAddCatModal(false)
-    showToast(`Category "${data.name}" added!`)
+    showToast(`Category "${data.name}" added & saved!`)
   }
 
   // ── Edit Category ──
   const handleEditCategory = (data) => {
+    if (isGuest) return
     setCategories(prev => prev.map(c => c.id === editCatModal.category.id ? { ...c, ...data } : c))
     setEditCatModal({ open:false, category:null })
-    showToast('Category updated!')
+    showToast('Category updated & saved!')
   }
 
   // ── Delete Category ──
   const handleDeleteCategory = () => {
+    if (isGuest) return
     const { category } = delCatModal
     setCategories(prev => prev.filter(c => c.id !== category.id))
     setFavorites(prev => prev.filter(id => !category.servers.find(s => s.id === id)))
     setDelCatModal({ open:false, category:null })
     if (activeView === `cat_${category.id}`) setActiveView('dashboard')
-    showToast('Category deleted')
+    showToast('Category deleted & saved')
   }
 
   // ── Render view ──
@@ -1077,6 +1159,7 @@ export default function Dashboard({ onLogout, role }) {
         onEditServer={(catId, s) => setEditServerModal({ open:true, catId, server:s })}
         onDeleteServer={(catId, s) => setDelServerModal({ open:true, catId, server:s })}
         showToast={showToast}
+        t={t}
       />
     )
     if (activeView === 'favorites') return (
@@ -1086,6 +1169,7 @@ export default function Dashboard({ onLogout, role }) {
         onEditServer={(catId, s) => setEditServerModal({ open:true, catId, server:s })}
         onDeleteServer={(catId, s) => setDelServerModal({ open:true, catId, server:s })}
         showToast={showToast}
+        t={t}
       />
     )
     if (activeView === 'recent') return (
@@ -1095,6 +1179,7 @@ export default function Dashboard({ onLogout, role }) {
         onEditServer={(catId, s) => setEditServerModal({ open:true, catId, server:s })}
         onDeleteServer={(catId, s) => setDelServerModal({ open:true, catId, server:s })}
         showToast={showToast}
+        t={t}
       />
     )
     if (activeView.startsWith('cat_')) {
@@ -1111,6 +1196,7 @@ export default function Dashboard({ onLogout, role }) {
             onEditCategory={(c) => setEditCatModal({ open:true, category:c })}
             onDeleteCategory={(c) => setDelCatModal({ open:true, category:c })}
             showToast={showToast}
+            t={t}
           />
         </div>
       )
@@ -1120,9 +1206,9 @@ export default function Dashboard({ onLogout, role }) {
       <div>
         <HeroSection isGuest={isGuest} onNav={(action) => {
           if (action === 'add_category') setAddCatModal(true)
-        }}/>
+        }} t={t}/>
         <div style={{ padding:'16px 0 0' }}>
-          <StatsBar categories={categories} favCount={favorites.length}/>
+          <StatsBar categories={categories} favCount={favorites.length} t={t}/>
         </div>
         <div style={{ paddingBottom:40 }}>
           {categories.map(cat => (
@@ -1135,6 +1221,7 @@ export default function Dashboard({ onLogout, role }) {
               onEditCategory={(c) => setEditCatModal({ open:true, category:c })}
               onDeleteCategory={(c) => setDelCatModal({ open:true, category:c })}
               showToast={showToast}
+              t={t}
             />
           ))}
         </div>
@@ -1143,13 +1230,14 @@ export default function Dashboard({ onLogout, role }) {
   }
 
   return (
-    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'#070f1c', color:'#ccc', fontFamily:"'Inter','Segoe UI',sans-serif" }}>
+    <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:t.bgPrimary, color:t.text, fontFamily:"'Inter','Segoe UI',sans-serif" }}>
       {/* Sidebar */}
       <Sidebar
         categories={categories} activeView={activeView}
         setActiveView={setActiveView} onLogout={onLogout}
         isGuest={isGuest} collapsed={sidebarCollapsed}
         setCollapsed={setSidebarCollapsed}
+        t={t}
       />
 
       {/* Main */}
@@ -1157,14 +1245,14 @@ export default function Dashboard({ onLogout, role }) {
         {/* Top bar */}
         <div style={{
           position:'sticky', top:0, zIndex:50,
-          background:'rgba(7,15,28,0.9)', backdropFilter:'blur(20px)',
-          borderBottom:'1px solid rgba(0,229,255,0.06)',
+          background:t.glassBg, backdropFilter:'blur(20px)',
+          borderBottom:`1px solid ${t.border}`,
           padding:'10px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:12,
         }}>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <UserBadge isGuest={isGuest}/>
-            <div style={{ width:1, height:16, background:'rgba(255,255,255,0.08)' }}/>
-            <nav style={{ display:'flex', alignItems:'center', gap:4, fontSize:11.5, color:'#555' }}>
+            <UserBadge isGuest={isGuest} t={t}/>
+            <div style={{ width:1, height:16, background:t.border }}/>
+            <nav style={{ display:'flex', alignItems:'center', gap:4, fontSize:11.5, color:t.textMuted }}>
               <span>Portal</span>
               <FaChevronRight size={8}/>
               <span style={{ color:'#00E5FF', fontWeight:600 }}>
@@ -1178,16 +1266,18 @@ export default function Dashboard({ onLogout, role }) {
             </nav>
           </div>
           <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+            {/* Theme toggle */}
+            <ThemeToggleBtn theme={theme} toggleTheme={toggleTheme} />
             {/* Search shortcut */}
             <button
               onClick={() => setActiveView('search')}
               style={{
                 display:'flex', alignItems:'center', gap:7, padding:'7px 14px', borderRadius:10,
-                background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
-                color:'#555', cursor:'pointer', fontSize:12, transition:'all .2s',
+                background:'rgba(255,255,255,0.04)', border:`1px solid ${t.border}`,
+                color:t.textMuted, cursor:'pointer', fontSize:12, transition:'all .2s',
               }}
               onMouseEnter={e=>{e.currentTarget.style.color='#bbb';e.currentTarget.style.background='rgba(255,255,255,0.08)'}}
-              onMouseLeave={e=>{e.currentTarget.style.color='#555';e.currentTarget.style.background='rgba(255,255,255,0.04)'}}
+              onMouseLeave={e=>{e.currentTarget.style.color=t.textMuted;e.currentTarget.style.background='rgba(255,255,255,0.04)'}}
             >
               <FaSearch size={11}/> <span>Search</span>
             </button>
@@ -1229,23 +1319,24 @@ export default function Dashboard({ onLogout, role }) {
         {/* Footer */}
         <footer style={{
           padding:'24px', textAlign:'center',
-          borderTop:'1px solid rgba(0,229,255,0.06)', marginTop:'auto',
+          borderTop:`1px solid ${t.border}`, marginTop:'auto',
         }}>
           <div style={{ fontSize:12, fontWeight:900, background:'linear-gradient(90deg,#00E5FF,#7B61FF)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', letterSpacing:'0.1em', marginBottom:4 }}>
             MY SERVER PAGE
           </div>
-          <div style={{ fontSize:11, color:'#444' }}>
+          <div style={{ fontSize:11, color:t.textFaint }}>
             Created by <span style={{ color:'#00E5FF' }}>Hasan</span> · v1.0.0 · © 2026 · FIFA 2026 Inspired
           </div>
         </footer>
       </main>
 
-      {/* ── Modals ── */}
+      {/* ── Modals (admin only — guests never get these triggers) ── */}
       <ServerModal
         open={addServerModal.open}
         onClose={() => setAddServerModal({ open:false, catId:null })}
         onSave={(data) => handleAddServer(addServerModal.catId, data)}
         title="Add New Server"
+        t={t}
       />
       <ServerModal
         open={editServerModal.open}
@@ -1253,18 +1344,21 @@ export default function Dashboard({ onLogout, role }) {
         onSave={(data) => handleEditServer(editServerModal.catId, data)}
         initial={editServerModal.server}
         title="Edit Server"
+        t={t}
       />
       <ConfirmModal
         open={delServerModal.open}
         onClose={() => setDelServerModal({ open:false, catId:null, server:null })}
         onConfirm={handleDeleteServer}
         message={`Delete "${delServerModal.server?.name}"? This cannot be undone.`}
+        t={t}
       />
       <CategoryModal
         open={addCatModal}
         onClose={() => setAddCatModal(false)}
         onSave={handleAddCategory}
         title="Add New Category"
+        t={t}
       />
       <CategoryModal
         open={editCatModal.open}
@@ -1272,12 +1366,14 @@ export default function Dashboard({ onLogout, role }) {
         onSave={handleEditCategory}
         initial={editCatModal.category}
         title="Edit Category"
+        t={t}
       />
       <ConfirmModal
         open={delCatModal.open}
         onClose={() => setDelCatModal({ open:false, category:null })}
         onConfirm={handleDeleteCategory}
         message={`Delete category "${delCatModal.category?.name}" and ALL its servers? This cannot be undone.`}
+        t={t}
       />
 
       <Toast toast={toast}/>
