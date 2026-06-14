@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Zap, Shield, Server } from 'lucide-react'
 
-const CORRECT_USER = 'Hasan2211'
-const CORRECT_PASS = 'Hasan2780@'
+const CORRECT_USER = '0000'
+const CORRECT_PASS = '0000'
 
 const Particle = ({ style }) => (
   <div
@@ -149,6 +149,10 @@ export default function Login({ onLogin }) {
   const handleMouseMove = (e) => {
     setMousePos({ x: (e.clientX / window.innerWidth) * 100, y: (e.clientY / window.innerHeight) * 100 })
   }
+  const handleGuestLogin = () => {
+  localStorage.setItem('guestMode', 'true')
+  onLogin('guest')
+}
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -368,6 +372,22 @@ export default function Login({ onLogin }) {
                     </span>
                   )}
                 </motion.button>
+                <motion.button
+  type="button"
+  onClick={handleGuestLogin}
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.8 }}
+  whileTap={{ scale: 0.98 }}
+  className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all duration-300 mt-3"
+  style={{
+    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    color: '#ffffff'
+  }}
+>
+  Login As Guest
+</motion.button>
               </form>
 
               {/* Footer */}
