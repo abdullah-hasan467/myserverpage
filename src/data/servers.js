@@ -158,15 +158,6 @@ export const categories = [
         "icon": "💿",
         "tag": "HD",
         "iconKey": "FaPlay"
-      },
-      {
-        "id": "t9",
-        "name": "MoviezMad",
-        "url": "https://www.moviezmad.live/",
-        "description": "MoviezMad — Bollywood, Hollywood & dubbed movies",
-        "icon": "🍿",
-        "tag": "Movies",
-        "iconKey": "FaArchive"
       }
     ],
     "iconKey": "SiBittorrent"
@@ -175,7 +166,7 @@ export const categories = [
     "id": "dflix",
     "name": "Dflix Servers",
     "icon": "🎥",
-    "color": "#7B61FF",
+    "color": "#FF4C4C",
     "description": "Dflix media streaming ecosystem",
     "servers": [
       {
@@ -212,7 +203,7 @@ export const categories = [
     "id": "livetv",
     "name": "Live TV",
     "icon": "📡",
-    "color": "#FFD700",
+    "color": "#FF69B4",
     "description": "Live television and sports streaming",
     "servers": [
       {
@@ -221,7 +212,8 @@ export const categories = [
         "url": "https://amartv.xyz/",
         "description": "Amar TV live streaming portal",
         "icon": "📺",
-        "tag": "Live TV"
+        "tag": "Live TV",
+        "iconKey": "FaSatelliteDish"
       },
       {
         "id": "l2",
@@ -229,7 +221,8 @@ export const categories = [
         "url": "https://bdixtv.serverbd247.com/",
         "description": "BDIX live television service",
         "icon": "🎙️",
-        "tag": "BD TV"
+        "tag": "BD TV",
+        "iconKey": "FaBroadcastTower"
       },
       {
         "id": "l3",
@@ -237,7 +230,8 @@ export const categories = [
         "url": "http://iptvidn.com/",
         "description": "IPTV streaming platform",
         "icon": "🌐",
-        "tag": "IPTV"
+        "tag": "IPTV",
+        "iconKey": "MdCast"
       },
       {
         "id": "l4",
@@ -245,7 +239,8 @@ export const categories = [
         "url": "https://touchcricket.live/",
         "description": "Live cricket streaming",
         "icon": "🏏",
-        "tag": "Sports"
+        "tag": "Sports",
+        "iconKey": "MdSportsCricket"
       },
       {
         "id": "l5",
@@ -253,7 +248,8 @@ export const categories = [
         "url": "https://go.webcric.com/",
         "description": "WebCric live cricket portal",
         "icon": "🏟️",
-        "tag": "Cricket"
+        "tag": "Cricket",
+        "iconKey": "MdSportsCricket"
       },
       {
         "id": "l6",
@@ -261,7 +257,16 @@ export const categories = [
         "url": "https://bonobo.live/",
         "description": "All TV Channel",
         "icon": "🎥",
-        "tag": "TV"
+        "tag": "TV",
+        "iconKey": "FaTv"
+      },
+      {
+        "id": "jj4an4p",
+        "name": "DexTV by Fiber@Home",
+        "url": "https://watch.mydex.tv/",
+        "description": "Live TV & FIFA",
+        "tag": "FIFA 2026",
+        "iconKey": "MdStorage"
       }
     ],
     "iconKey": "FaSatelliteDish"
@@ -279,7 +284,8 @@ export const categories = [
         "url": "https://ctghall.com/",
         "description": "Chittagong Hall content server",
         "icon": "🏛️",
-        "tag": "Regional"
+        "tag": "Regional",
+        "iconKey": "FaPlay"
       },
       {
         "id": "s2",
@@ -287,7 +293,8 @@ export const categories = [
         "url": "https://crazyctg.com/",
         "description": "Crazy CTG entertainment portal",
         "icon": "🎪",
-        "tag": "Entertainment"
+        "tag": "Entertainment",
+        "iconKey": "MdLiveTv"
       },
       {
         "id": "s3",
@@ -295,7 +302,8 @@ export const categories = [
         "url": "https://ctgmovies.com/",
         "description": "Chittagong movies server",
         "icon": "🎞️",
-        "tag": "Movies"
+        "tag": "Movies",
+        "iconKey": "MdVideoLibrary"
       },
       {
         "id": "s4",
@@ -303,7 +311,8 @@ export const categories = [
         "url": "http://172.20.2.5/we/",
         "description": "Local network server WE",
         "icon": "🖥️",
-        "tag": "Local"
+        "tag": "Local",
+        "iconKey": "FaFolderOpen"
       },
       {
         "id": "s5",
@@ -311,7 +320,8 @@ export const categories = [
         "url": "http://bdixtv.live/we/",
         "description": "BDIX TV local network access",
         "icon": "📻",
-        "tag": "Local"
+        "tag": "Local",
+        "iconKey": "FaBroadcastTower"
       },
       {
         "id": "s6",
@@ -319,7 +329,8 @@ export const categories = [
         "url": "https://discoveryftp.net/",
         "description": "Discovery FTP content server",
         "icon": "🔭",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaHdd"
       },
       {
         "id": "s7",
@@ -327,7 +338,8 @@ export const categories = [
         "url": "http://172.16.50.4/",
         "description": "Local network server access",
         "icon": "🌐",
-        "tag": "Local"
+        "tag": "Local",
+        "iconKey": "FaServer"
       },
       {
         "id": "s8",
@@ -335,7 +347,8 @@ export const categories = [
         "url": "http://172.27.27.84/",
         "description": "Local network server 172.27.27.84",
         "icon": "💻",
-        "tag": "Local"
+        "tag": "Local",
+        "iconKey": "FaArchive"
       },
       {
         "id": "s9",
@@ -343,7 +356,8 @@ export const categories = [
         "url": "https://www.bcncommunication.net/ftp-services",
         "description": "BCN Communication FTP services",
         "icon": "📡",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaArchive"
       }
     ],
     "iconKey": "FaBroadcastTower"
@@ -361,7 +375,8 @@ export const categories = [
         "url": "http://new.circleftp.net/",
         "description": "New Circle FTP server",
         "icon": "🔄",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "FaFolderOpen"
       },
       {
         "id": "u2",
@@ -369,7 +384,8 @@ export const categories = [
         "url": "https://freedrivemovie.cfd/",
         "description": "Free movie drive collection",
         "icon": "🎬",
-        "tag": "Movies"
+        "tag": "Movies",
+        "iconKey": "FaPlay"
       },
       {
         "id": "u3",
@@ -377,7 +393,8 @@ export const categories = [
         "url": "https://mlsbd.co/",
         "description": "MLS BD content server",
         "icon": "📁",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "MdLiveTv"
       },
       {
         "id": "u4",
@@ -385,7 +402,8 @@ export const categories = [
         "url": "https://fojik.com/",
         "description": "Fojik media platform",
         "icon": "🎭",
-        "tag": "Media"
+        "tag": "Media",
+        "iconKey": "FaDownload"
       },
       {
         "id": "u5",
@@ -393,15 +411,8 @@ export const categories = [
         "url": "https://flixmet.net/",
         "description": "FlixMet streaming service",
         "icon": "🍿",
-        "tag": "Streaming"
-      },
-      {
-        "id": "u6",
-        "name": "11Plus Live",
-        "url": "https://11plus.live/",
-        "description": "Live streaming portal",
-        "icon": "📡",
-        "tag": "Live"
+        "tag": "Streaming",
+        "iconKey": "FaHdd"
       },
       {
         "id": "u7",
@@ -409,7 +420,8 @@ export const categories = [
         "url": "https://archive.org/",
         "description": "The Internet Archive - wayback machine & media",
         "icon": "📚",
-        "tag": "Archive"
+        "tag": "Archive",
+        "iconKey": "FaDownload"
       },
       {
         "id": "u8",
@@ -417,7 +429,8 @@ export const categories = [
         "url": "http://ftpserver.com.bd/live-tv-2/",
         "description": "Bangladesh FTP server live TV",
         "icon": "🖥️",
-        "tag": "FTP"
+        "tag": "FTP",
+        "iconKey": "MdCloud"
       },
       {
         "id": "u9",
@@ -425,7 +438,8 @@ export const categories = [
         "url": "https://hicine.app/",
         "description": "HiCine movie streaming app",
         "icon": "🎥",
-        "tag": "Streaming"
+        "tag": "Streaming",
+        "iconKey": "MdVideoLibrary"
       },
       {
         "id": "u10",
@@ -433,7 +447,8 @@ export const categories = [
         "url": "https://hurawatchzz.tv/home",
         "description": "Hurawatch anime & movies",
         "icon": "👁️",
-        "tag": "Anime"
+        "tag": "Anime",
+        "iconKey": "FaFilm"
       },
       {
         "id": "u11",
@@ -442,14 +457,6 @@ export const categories = [
         "description": "9Anime - HD anime streaming",
         "icon": "⛩️",
         "tag": "Anime"
-      },
-      {
-        "id": "u12",
-        "name": "MyDex TV",
-        "url": "https://watch.mydex.tv/",
-        "description": "MyDex TV streaming platform",
-        "icon": "📺",
-        "tag": "TV"
       }
     ],
     "iconKey": "FaSatelliteDish"
